@@ -1,10 +1,12 @@
+from pathlib import Path
 import pickle
-from contextlib import asynccontextmanager, suppress
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Base64UrlBytes
 
 from db import Data, User
+
 
 import asyncio
 from openai import OpenAI, AsyncOpenAI
@@ -14,23 +16,29 @@ from langchain.schema import AIMessage, HumanMessage
 from dotenv import load_dotenv
 import os
 
-
-
 data: Data = Data()
 load_dotenv()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # global data
-    # with suppress(FileNotFoundError):
-    #     with open("data.txt", "rb") as f:
-    #         data = pickle.load(f)
+    global data
+
+    path = Path("uwudb.fr")
+    if path.exists() and (
+        not path.stat().st_size
+        or path.stat().st_ctime < Path(__file__).stat().st_ctime
+    ):
+        path.unlink()
+
+    if path.exists():
+        with open(path, "rb") as f:
+            data = pickle.load(f)
 
     yield
 
-    # with open("data.txt", "wb") as f:
-    #     pickle.dump(data, f)
+    with open(path, "wb") as f:
+        pickle.dump(data, f)
 
 
 app = FastAPI(lifespan=lifespan)
@@ -59,7 +67,7 @@ async def users():
 
 
 class ImageModel(BaseModel):
-    image: str
+    image: Base64UrlBytes
 
 
 @app.post("/upimage/{id}")
