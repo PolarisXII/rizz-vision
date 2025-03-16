@@ -10,6 +10,6 @@ class Data(BaseModel):
 class User(BaseModel):
     name: str
     password: str
-    images: list[Base64UrlBytes]
+    images: list[str]
     keywords: dict[str, int] = Field(default_factory=dict)
     id: str = Field(default_factory=lambda: str(uuid4()))

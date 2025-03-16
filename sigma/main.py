@@ -67,7 +67,7 @@ async def users():
 
 
 class ImageModel(BaseModel):
-    image: Base64UrlBytes
+    image: str
 
 
 @app.post("/upimage/{id}")
@@ -79,16 +79,13 @@ async def upimage(id: str, image: ImageModel):
     api_key = os.getenv("OPENAI_API_KEY")
 
     # ai analysis
-    print(api_key)
+
     client = AsyncOpenAI(api_key=api_key)
     output_parser = CommaSeparatedListOutputParser()
-
     prompt_template = PromptTemplate(
         template="Based on the image posted by the user, provide 20 hobbies, interests and characteristics that can be inferred from the image. The interests, hobbies or characteristics should only be one word. Separate the hobbies, interests and characteristics by commas.",
         input_variables=[],
     )
-    # print(image)
-    # print(image.image)
     messages = [
       {"role": "system", "content": "You are an AI that extracts keywords from images."},
         {"role": "user", "content": [
